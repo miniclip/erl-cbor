@@ -14,6 +14,7 @@
 
 -module(cbor_base64_test).
 
+-ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 
 decode_test() ->
@@ -33,3 +34,4 @@ decode_test() ->
   ?assertEqual(<<"">>, Decode(<<"">>)),
   ?assertEqual(<<16#fb>>, Decode(<<"+/==">>)),
   ?assertEqual(<<16#fb>>, Decode(<<"+/">>)).
+-endif.

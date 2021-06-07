@@ -25,7 +25,7 @@
 -type decoder() :: #decoder{}.
 
 -type options() :: #{max_depth => non_neg_integer(),
-                     value_interpreters => 
+                     value_interpreters =>
                       #{cbor:type() := value_interpreter()}}.
 
 -type value_interpreter() :: fun((decoder(), cbor:value()) ->
@@ -267,7 +267,7 @@ decode_indefinite_length_map(Decoder, Data) ->
 -spec decode_tagged_value(decoder(), Type, iodata()) ->
         decoding_result(Result) when
     Type :: 16#c0..16#db,
-    Result :: cbor:tagged_value() | term().
+    Result :: cbor:value() | term().
 decode_tagged_value(Decoder, Type, Data) when
     Type >= 16#c0, Type =< 16#d7 ->
   decode_tagged_data(Decoder, Type - 16#c0, Data);
@@ -284,7 +284,7 @@ decode_tagged_value(_Decoder, _Type, _Data) ->
 
 -spec decode_tagged_data(decoder(), cbor:tag(), iodata()) ->
         decoding_result(Result) when
-    Result :: cbor:tagged_value() | term().
+    Result :: cbor:value() | term().
 decode_tagged_data(Decoder = #decoder{depth = Depth}, Tag, Data) ->
   Decoder2 = Decoder#decoder{depth = Depth+1},
   case decode(Decoder2, Data) of
@@ -299,7 +299,7 @@ decode_tagged_data(Decoder = #decoder{depth = Depth}, Tag, Data) ->
       {error, Reason}
   end.
 
--spec maybe_interpret_value(decoder(), {cbor:types(), decoding_result(term())})
+-spec maybe_interpret_value(decoder(), {cbor:type(), decoding_result(term())})
   -> decoding_result(term()).
 maybe_interpret_value(_Decoder, {_Type, {error, _Value} = Tag}) ->
   Tag;
@@ -311,7 +311,7 @@ maybe_interpret_value(Decoder, {Type, {ok, Value, Rest}}) ->
       {ok, Interpreted, Rest}
   end.
 
--spec interpret_value(decoder(), cbor:tagged_value()) ->
+-spec interpret_value(decoder(), cbor:value() | cbor:value()) ->
         interpretation_result(term()).
 interpret_value(Decoder = #decoder{options = #{value_interpreters := Interpreters}},
                        TaggedValue = {Tag, _Value}) ->
@@ -324,14 +324,14 @@ interpret_value(Decoder = #decoder{options = #{value_interpreters := Interpreter
 interpret_value(_Decoder, TaggedValue) ->
   {ok, TaggedValue}.
 
--spec interpret_utf8_string(decoder(), cbor:tagged_value()) ->
+-spec interpret_utf8_string(decoder(), cbor:value()) ->
         interpretation_result(unicode:chardata()).
 interpret_utf8_string(_Decoder, {_Tag, Value}) when is_binary(Value) ->
   {ok, Value};
 interpret_utf8_string(_Decoder, TaggedValue) ->
   {error, {invalid_tagged_value, TaggedValue}}.
 
--spec interpret_epoch_based_datetime(decoder(), cbor:tagged_value()) ->
+-spec interpret_epoch_based_datetime(decoder(), cbor:value()) ->
         interpretation_result(integer()).
 interpret_epoch_based_datetime(_Decoder, {_Tag, Value}) when
     is_integer(Value) ->
@@ -342,7 +342,7 @@ interpret_epoch_based_datetime(_Decoder, {_Tag, Value}) when
 interpret_epoch_based_datetime(_Decoder, TaggedValue) ->
   {error, {invalid_tagged_value, TaggedValue}}.
 
--spec interpret_positive_bignum(decoder(), cbor:tagged_value()) ->
+-spec interpret_positive_bignum(decoder(), cbor:value()) ->
         interpretation_result(integer()).
 interpret_positive_bignum(_Decoder, {_Tag, Value}) when is_binary(Value) ->
   Size = byte_size(Value) * 8,
@@ -351,7 +351,7 @@ interpret_positive_bignum(_Decoder, {_Tag, Value}) when is_binary(Value) ->
 interpret_positive_bignum(_Decoder, TaggedValue) ->
   {error, {invalid_tagged_value, TaggedValue}}.
 
--spec interpret_negative_bignum(decoder(), cbor:tagged_value()) ->
+-spec interpret_negative_bignum(decoder(), cbor:value()) ->
         interpretation_result(integer()).
 interpret_negative_bignum(_Decoder, {_Tag, Value}) when is_binary(Value) ->
   Size = byte_size(Value) * 8,
@@ -360,7 +360,7 @@ interpret_negative_bignum(_Decoder, {_Tag, Value}) when is_binary(Value) ->
 interpret_negative_bignum(_Decoder, TaggedValue) ->
   {error, {invalid_tagged_value, TaggedValue}}.
 
--spec interpret_base64url_data(decoder(), cbor:tagged_value()) ->
+-spec interpret_base64url_data(decoder(), cbor:value()) ->
         interpretation_result(binary()).
 interpret_base64url_data(_Decoder, {_Tag, Value}) when is_binary(Value) ->
   case cbor_base64url:decode(Value) of
@@ -372,7 +372,7 @@ interpret_base64url_data(_Decoder, {_Tag, Value}) when is_binary(Value) ->
 interpret_base64url_data(_Decoder, TaggedValue) ->
   {error, {invalid_tagged_value, TaggedValue}}.
 
--spec interpret_base64_data(decoder(), cbor:tagged_value()) ->
+-spec interpret_base64_data(decoder(), cbor:value()) ->
         interpretation_result(binary()).
 interpret_base64_data(_Decoder, {_Tag, Value}) when is_binary(Value) ->
   case cbor_base64:decode(Value) of
@@ -384,7 +384,7 @@ interpret_base64_data(_Decoder, {_Tag, Value}) when is_binary(Value) ->
 interpret_base64_data(_Decoder, TaggedValue) ->
   {error, {invalid_tagged_value, TaggedValue}}.
 
--spec interpret_cbor_value(decoder(), cbor:tagged_value()) ->
+-spec interpret_cbor_value(decoder(), cbor:value()) ->
         interpretation_result(term()).
 interpret_cbor_value(Decoder, {_Tag, Value}) when is_binary(Value) ->
   case decode(Decoder, Value) of
@@ -398,7 +398,7 @@ interpret_cbor_value(Decoder, {_Tag, Value}) when is_binary(Value) ->
 interpret_cbor_value(_Decoder, TaggedValue) ->
   {error, {invalid_tagged_value, TaggedValue}}.
 
--spec interpret_self_described_cbor_value(decoder(), cbor:tagged_value()) ->
+-spec interpret_self_described_cbor_value(decoder(), cbor:value()) ->
         interpretation_result(term()).
 interpret_self_described_cbor_value(_Decoder, {_Tag, Value}) ->
   {ok, Value}.
