@@ -14,6 +14,7 @@
 
 -module(cbor_test).
 
+-ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 
 encode_test() ->
@@ -454,3 +455,4 @@ decode_without_interpreters_test() ->
                                cbor_decoding:default_options())),
   ?assertEqual({ok, {2, <<1, 0, 0, 0, 0, 0, 0, 0, 0>>}, <<>>},
                cbor:decode_hex(<<"c249010000000000000000">>, #{})).
+-endif.
