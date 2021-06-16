@@ -12,7 +12,7 @@
 %% ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
 %% IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
--module(cbor_util).
+-module(erl_cbor_util).
 
 -export([unsigned_integer_bytes/1,
          encode_sequence_header/2, decode_sequence_header/2,

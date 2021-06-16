@@ -12,7 +12,7 @@
 %% ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
 %% IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
--module(cbor_decoding).
+-module(erl_cbor_decoding).
 
 -export([default_options/0, default_value_interpreters/0,
          decoder/1, decode/2]).
@@ -28,9 +28,9 @@
 
 -type options() :: #{max_depth => non_neg_integer(),
                      value_interpreters =>
-                      #{cbor:type() := value_interpreter()}}.
+                      #{erl_cbor:type() := value_interpreter()}}.
 
--type value_interpreter() :: fun((decoder(), cbor:value()) ->
+-type value_interpreter() :: fun((decoder(), erl_cbor:value()) ->
                                     interpretation_result(term())).
 
 -type decoding_result(ValueType) :: {ok, ValueType, iodata()} | {error, decoding_error()}.
@@ -70,7 +70,7 @@ default_options() ->
     value_interpreters => default_value_interpreters()}.
 
 -spec default_value_interpreters() ->
-        #{cbor:type() := value_interpreter()}.
+        #{erl_cbor:type() := value_interpreter()}.
 default_value_interpreters() ->
   #{0 => fun interpret_utf8_string/2,
     1 => fun interpret_epoch_based_datetime/2,
@@ -170,7 +170,7 @@ decode_negative_integer(_Type, _Data) ->
 -spec decode_byte_string(Type, iodata()) -> decoding_result(binary()) when
     Type :: 16#40..16#5b.
 decode_byte_string(Type, Data) ->
-  case cbor_util:decode_sequence_header(Type, Data) of
+  case erl_cbor_util:decode_sequence_header(Type, Data) of
     {ok, Len, Data2} ->
       case Data2 of
         <<Bin:Len/binary, Rest/binary>> ->
@@ -196,7 +196,7 @@ decode_indefinite_length_byte_string(Data) ->
 -spec decode_utf8_string(Type, iodata()) -> decoding_result(binary()) when
     Type :: 16#60..16#7b.
 decode_utf8_string(Type, Data) ->
-  case cbor_util:decode_sequence_header(Type, Data) of
+  case erl_cbor_util:decode_sequence_header(Type, Data) of
     {ok, Len, Data2} ->
       case Data2 of
         <<Bin:Len/binary, Rest/binary>> ->
@@ -236,7 +236,7 @@ decode_indefinite_length_utf8_string(Data) ->
 -spec decode_array(decoder(), Type, iodata()) -> decoding_result(list()) when
     Type :: 16#80..16#9b.
 decode_array(Decoder, Type, Data) ->
-  case cbor_util:decode_sequence_header(Type, Data) of
+  case erl_cbor_util:decode_sequence_header(Type, Data) of
     {ok, Len, Data2} ->
       case decode_values(Decoder, Data2, Len, []) of
         {ok, Values, Rest} ->
@@ -265,11 +265,11 @@ decode_indefinite_length_array(Decoder, Data) ->
 -spec decode_map(decoder(), Type, iodata()) -> decoding_result(map()) when
     Type :: 16#a0..16#bb.
 decode_map(Decoder, Type, Data) ->
-  case cbor_util:decode_sequence_header(Type, Data) of
+  case erl_cbor_util:decode_sequence_header(Type, Data) of
     {ok, Len, Data2} ->
       case decode_values(Decoder, Data2, Len*2, []) of
         {ok, Values, Rest} ->
-          {ok, cbor_util:list_to_map(Values), Rest};
+          {ok, erl_cbor_util:list_to_map(Values), Rest};
         {error, truncated_sequence} ->
           {error, truncated_map};
         {error, Reason} ->
@@ -286,7 +286,7 @@ decode_indefinite_length_map(Decoder, Data) ->
     {ok, Values, _Rest} when (length(Values) rem 2) /= 0 ->
       {error, odd_number_of_map_values};
     {ok, Values, Rest} ->
-      {ok, cbor_util:list_to_map(Values), Rest};
+      {ok, erl_cbor_util:list_to_map(Values), Rest};
     {error, truncated_sequence} ->
       {error, truncated_map};
     {error, Reason} ->
@@ -296,7 +296,7 @@ decode_indefinite_length_map(Decoder, Data) ->
 -spec decode_tagged_value(decoder(), Type, iodata()) ->
         decoding_result(Result) when
     Type :: 16#c0..16#db,
-    Result :: cbor:value() | term().
+    Result :: erl_cbor:value() | term().
 decode_tagged_value(Decoder, Type, Data) when
     Type >= 16#c0, Type =< 16#d7 ->
   decode_tagged_data(Decoder, Type - 16#c0, Data);
@@ -311,9 +311,9 @@ decode_tagged_value(Decoder, 16#db, <<Tag:64, Data/binary>>) ->
 decode_tagged_value(_Decoder, _Type, _Data) ->
   {error, truncated_tagged_value}.
 
--spec decode_tagged_data(decoder(), cbor:tag(), iodata()) ->
+-spec decode_tagged_data(decoder(), erl_cbor:tag(), iodata()) ->
         decoding_result(Result) when
-    Result :: cbor:value() | term().
+    Result :: erl_cbor:value() | term().
 decode_tagged_data(Decoder = #decoder{depth = Depth}, Tag, Data) ->
   Decoder2 = Decoder#decoder{depth = Depth+1},
   case decode(Decoder2, Data) of
@@ -328,7 +328,7 @@ decode_tagged_data(Decoder = #decoder{depth = Depth}, Tag, Data) ->
       {error, Reason}
   end.
 
--spec maybe_interpret_value(decoder(), {cbor:type(), decoding_result(term())})
+-spec maybe_interpret_value(decoder(), {erl_cbor:type(), decoding_result(term())})
   -> decoding_result(term()).
 maybe_interpret_value(_Decoder, {_Type, {error, _Value} = Tag}) ->
   Tag;
@@ -340,7 +340,7 @@ maybe_interpret_value(Decoder, {Type, {ok, Value, Rest}}) ->
       {ok, Interpreted, Rest}
   end.
 
--spec interpret_value(decoder(), cbor:value() | cbor:value()) ->
+-spec interpret_value(decoder(), erl_cbor:value() | erl_cbor:value()) ->
         interpretation_result(term()).
 interpret_value(Decoder = #decoder{options = #{value_interpreters := Interpreters}},
                        TaggedValue = {Tag, _Value}) ->
@@ -353,14 +353,14 @@ interpret_value(Decoder = #decoder{options = #{value_interpreters := Interpreter
 interpret_value(_Decoder, TaggedValue) ->
   {ok, TaggedValue}.
 
--spec interpret_utf8_string(decoder(), cbor:value()) ->
+-spec interpret_utf8_string(decoder(), erl_cbor:value()) ->
         interpretation_result(unicode:chardata()).
 interpret_utf8_string(_Decoder, {_Tag, Value}) when is_binary(Value) ->
   {ok, Value};
 interpret_utf8_string(_Decoder, TaggedValue) ->
   {error, {invalid_tagged_value, TaggedValue}}.
 
--spec interpret_epoch_based_datetime(decoder(), cbor:value()) ->
+-spec interpret_epoch_based_datetime(decoder(), erl_cbor:value()) ->
         interpretation_result(integer()).
 interpret_epoch_based_datetime(_Decoder, {_Tag, Value}) when
     is_integer(Value) ->
@@ -371,7 +371,7 @@ interpret_epoch_based_datetime(_Decoder, {_Tag, Value}) when
 interpret_epoch_based_datetime(_Decoder, TaggedValue) ->
   {error, {invalid_tagged_value, TaggedValue}}.
 
--spec interpret_positive_bignum(decoder(), cbor:value()) ->
+-spec interpret_positive_bignum(decoder(), erl_cbor:value()) ->
         interpretation_result(integer()).
 interpret_positive_bignum(_Decoder, {_Tag, Value}) when is_binary(Value) ->
   Size = byte_size(Value) * 8,
@@ -380,7 +380,7 @@ interpret_positive_bignum(_Decoder, {_Tag, Value}) when is_binary(Value) ->
 interpret_positive_bignum(_Decoder, TaggedValue) ->
   {error, {invalid_tagged_value, TaggedValue}}.
 
--spec interpret_negative_bignum(decoder(), cbor:value()) ->
+-spec interpret_negative_bignum(decoder(), erl_cbor:value()) ->
         interpretation_result(integer()).
 interpret_negative_bignum(_Decoder, {_Tag, Value}) when is_binary(Value) ->
   Size = byte_size(Value) * 8,
@@ -389,10 +389,10 @@ interpret_negative_bignum(_Decoder, {_Tag, Value}) when is_binary(Value) ->
 interpret_negative_bignum(_Decoder, TaggedValue) ->
   {error, {invalid_tagged_value, TaggedValue}}.
 
--spec interpret_base64url_data(decoder(), cbor:value()) ->
+-spec interpret_base64url_data(decoder(), erl_cbor:value()) ->
         interpretation_result(binary()).
 interpret_base64url_data(_Decoder, {_Tag, Value}) when is_binary(Value) ->
-  case cbor_base64url:decode(Value) of
+  case erl_cbor_base64url:decode(Value) of
     {ok, Bin} ->
       {ok, Bin};
     {error, Reason} ->
@@ -401,10 +401,10 @@ interpret_base64url_data(_Decoder, {_Tag, Value}) when is_binary(Value) ->
 interpret_base64url_data(_Decoder, TaggedValue) ->
   {error, {invalid_tagged_value, TaggedValue}}.
 
--spec interpret_base64_data(decoder(), cbor:value()) ->
+-spec interpret_base64_data(decoder(), erl_cbor:value()) ->
         interpretation_result(binary()).
 interpret_base64_data(_Decoder, {_Tag, Value}) when is_binary(Value) ->
-  case cbor_base64:decode(Value) of
+  case erl_cbor_base64:decode(Value) of
     {ok, Bin} ->
       {ok, Bin};
     {error, Reason} ->
@@ -413,7 +413,7 @@ interpret_base64_data(_Decoder, {_Tag, Value}) when is_binary(Value) ->
 interpret_base64_data(_Decoder, TaggedValue) ->
   {error, {invalid_tagged_value, TaggedValue}}.
 
--spec interpret_cbor_value(decoder(), cbor:value()) ->
+-spec interpret_cbor_value(decoder(), erl_cbor:value()) ->
         interpretation_result(term()).
 interpret_cbor_value(Decoder, {_Tag, Value}) when is_binary(Value) ->
   case decode(Decoder, Value) of
@@ -427,13 +427,13 @@ interpret_cbor_value(Decoder, {_Tag, Value}) when is_binary(Value) ->
 interpret_cbor_value(_Decoder, TaggedValue) ->
   {error, {invalid_tagged_value, TaggedValue}}.
 
--spec interpret_self_described_cbor_value(decoder(), cbor:value()) ->
+-spec interpret_self_described_cbor_value(decoder(), erl_cbor:value()) ->
         interpretation_result(term()).
 interpret_self_described_cbor_value(_Decoder, {_Tag, Value}) ->
   {ok, Value}.
 
 -spec decode_simple_value(Type, iodata()) ->
-        decoding_result(cbor:simple_value()) when
+        decoding_result(erl_cbor:simple_value()) when
     Type :: 16#e9..16#f8.
 decode_simple_value(Type, <<Data/binary>>) when Type >= 16#e0, Type =< 16#f3 ->
   {ok, {simple_value, Type - 16#e0}, Data};
@@ -450,17 +450,17 @@ decode_simple_value(16#f8, <<Value:8, Data/binary>>) ->
 decode_simple_value(16#f8, <<>>) ->
   {error, truncated_simple_value}.
 
--spec decode_float(Type, iodata()) -> decoding_result(cbor_float:value()) when
+-spec decode_float(Type, iodata()) -> decoding_result(erl_cbor_float:value()) when
     Type :: 16#f9..16#fb.
 %% Half-precision
 decode_float(16#f9, <<Data:2/binary, Rest/binary>>) ->
-  {ok, cbor_float:decode_f16(Data), Rest};
+  {ok, erl_cbor_float:decode_f16(Data), Rest};
 %% Single precision
 decode_float(16#fa, <<Data:4/binary, Rest/binary>>) ->
-  {ok, cbor_float:decode_f32(Data), Rest};
+  {ok, erl_cbor_float:decode_f32(Data), Rest};
 %% Double precision
 decode_float(16#fb, <<Data:8/binary, Rest/binary>>) ->
-  {ok, cbor_float:decode_f64(Data), Rest};
+  {ok, erl_cbor_float:decode_f64(Data), Rest};
 %% Truncated
 decode_float(_Type, _Data) ->
   {error, truncated_float}.

@@ -12,14 +12,14 @@
 %% ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
 %% IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
--module(cbor_test).
+-module(erl_cbor_test).
 
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 
 encode_test() ->
   Encode = fun (Value) ->
-               binary_to_list(cbor:encode_hex(Value))
+               binary_to_list(erl_cbor:encode_hex(Value))
            end,
   %% Integers
   ?assertEqual("00", Encode(0)),
@@ -161,7 +161,7 @@ encode_test() ->
 decode_test() ->
   Decode = fun (Str) ->
                Bin = list_to_binary(Str),
-               {ok, Value, _Rest} = cbor:decode_hex(Bin),
+               {ok, Value, _Rest} = erl_cbor:decode_hex(Bin),
                Value
            end,
   %% Integers
@@ -311,7 +311,7 @@ decode_test() ->
 decode_error_test() ->
   Decode = fun (Str) ->
                Bin = list_to_binary(Str),
-               {error, Reason} = cbor:decode_hex(Bin),
+               {error, Reason} = erl_cbor:decode_hex(Bin),
                Reason
            end,
   ?assertEqual(no_input, Decode("")),
@@ -412,9 +412,9 @@ decode_error_test() ->
 decode_depth_test() ->
   Decode = fun (Str, MaxDepth) ->
                Bin = list_to_binary(Str),
-               Opts = maps:merge(cbor_decoding:default_options(),
+               Opts = maps:merge(erl_cbor_decoding:default_options(),
                                  #{max_depth => MaxDepth}),
-               cbor:decode_hex(Bin, Opts)
+               erl_cbor:decode_hex(Bin, Opts)
            end,
   %% Arrays
   ?assertEqual({ok, [[[1]]], <<>>}, Decode("81818101", 5)),
@@ -451,8 +451,8 @@ decode_depth_test() ->
 
 decode_without_interpreters_test() ->
   ?assertEqual({ok, 18446744073709551616, <<>>},
-               cbor:decode_hex(<<"c249010000000000000000">>,
-                               cbor_decoding:default_options())),
+               erl_cbor:decode_hex(<<"c249010000000000000000">>,
+                               erl_cbor_decoding:default_options())),
   ?assertEqual({ok, {2, <<1, 0, 0, 0, 0, 0, 0, 0, 0>>}, <<>>},
-               cbor:decode_hex(<<"c249010000000000000000">>, #{})).
+               erl_cbor:decode_hex(<<"c249010000000000000000">>, #{})).
 -endif.

@@ -12,7 +12,7 @@
 %% ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
 %% IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
--module(cbor_encoding).
+-module(erl_cbor_encoding).
 
 -export([encode/1]).
 
@@ -58,7 +58,7 @@ encode(Value) ->
 
 -spec encode_integer(integer()) -> iodata().
 encode_integer(I) when I > 16#ffffffffffffffff ->
-  [<<16#c2>>, encode_binary(cbor_util:unsigned_integer_bytes(I))];
+  [<<16#c2>>, encode_binary(erl_cbor_util:unsigned_integer_bytes(I))];
 encode_integer(I) when I > 16#ffffffff ->
   <<16#1b, I:64>>;
 encode_integer(I) when I > 16#ffff ->
@@ -80,7 +80,7 @@ encode_integer(I) when I >= -16#ffffffff - 1 ->
 encode_integer(I) when I >= -16#ffffffffffffffff - 1 ->
   <<16#3b, (-1 - I):64>>;
 encode_integer(I) ->
-  [<<16#c3>>, encode_binary(cbor_util:unsigned_integer_bytes(-1 - I))].
+  [<<16#c3>>, encode_binary(erl_cbor_util:unsigned_integer_bytes(-1 - I))].
 
 -spec encode_float(float()) -> iodata().
 encode_float(F) ->
@@ -94,17 +94,17 @@ encode_boolean(true) ->
 
 -spec encode_binary(binary()) -> iodata().
 encode_binary(Bin) ->
-  [cbor_util:encode_sequence_header(2, byte_size(Bin)), Bin].
+  [erl_cbor_util:encode_sequence_header(2, byte_size(Bin)), Bin].
 
 -spec encode_string(unicode:chardata()) -> iodata().
 encode_string(CharData) ->
   Bin = unicode:characters_to_binary(CharData),
-  [cbor_util:encode_sequence_header(3, byte_size(Bin)), Bin].
+  [erl_cbor_util:encode_sequence_header(3, byte_size(Bin)), Bin].
 
 -spec encode_list(list()) -> iodata().
 encode_list(List) ->
   {Data, Len} = encode_list_data(List, <<>>, 0),
-  [cbor_util:encode_sequence_header(4, Len), Data].
+  [erl_cbor_util:encode_sequence_header(4, Len), Data].
 
 -spec encode_list_data(list(), iodata(), Len) -> {iodata(), Len} when
     Len :: non_neg_integer().
@@ -122,16 +122,16 @@ encode_map(Map) ->
   SortedData = lists:sort(fun ([K1, _], [K2, _]) ->
                               K1 =< K2
                           end, Data),
-  [cbor_util:encode_sequence_header(5, Len), SortedData].
+  [erl_cbor_util:encode_sequence_header(5, Len), SortedData].
 
 -spec encode_datetime(Datetime) -> iodata() when
     Datetime :: calendar:datetime() | integer().
 encode_datetime(Datetime) ->
   encode_datetime(Datetime, 0).
 
--spec encode_datetime(cbor_time:datetime(), integer()) -> iodata().
+-spec encode_datetime(erl_cbor_time:datetime(), integer()) -> iodata().
 encode_datetime(Datetime, Offset) ->
-  {Seconds, _Nanoseconds} = cbor_time:datetime_to_seconds(Datetime),
+  {Seconds, _Nanoseconds} = erl_cbor_time:datetime_to_seconds(Datetime),
   OffsetValue = case Offset of
                   0 -> "Z";
                   _ -> Offset
@@ -139,16 +139,16 @@ encode_datetime(Datetime, Offset) ->
   String = calendar:system_time_to_rfc3339(Seconds, [{offset, OffsetValue}]),
   encode_tagged_value(0, {string, String}).
 
--spec encode_timestamp(cbor_time:datetime()) -> iodata().
+-spec encode_timestamp(erl_cbor_time:datetime()) -> iodata().
 encode_timestamp(Datetime) ->
-  case cbor_time:datetime_to_seconds(Datetime) of
+  case erl_cbor_time:datetime_to_seconds(Datetime) of
     {Seconds, 0} ->
       encode_tagged_value(1, Seconds);
     {Seconds, Nanoseconds} ->
       encode_tagged_value(1, erlang:float(Seconds) + Nanoseconds * 1.0e-9)
   end.
 
--spec encode_tagged_value(cbor:tag(), term()) -> iodata().
+-spec encode_tagged_value(erl_cbor:tag(), term()) -> iodata().
 encode_tagged_value(Tag, Value) when Tag =< 16#17 ->
   [<<6:3, Tag:5>>, encode(Value)];
 encode_tagged_value(Tag, Value) when Tag =< 16#ff ->

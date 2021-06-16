@@ -12,11 +12,10 @@
 %% ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
 %% IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-{application, cbor, [
-    {description, "An implementation of the CBOR data encoding format."},
+{application, erl_cbor, [
+    {description, "An Erlang implementation of the CBOR data encoding format."},
     {vsn, git},
     {registered, []},
-    {pkg_name, mc_cbor},
     {licenses, ["ISC license"]},
     {links, [{"GitHub", "https://github.com/miniclip/erl-cbor"}]},
 
