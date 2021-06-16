@@ -3,10 +3,6 @@
 Whenever there's an interface breaking change (a change in the project's major version),
 required migration instructions will be detailed in this file.
 
-The format is based on
-[Make a Migration](https://confluence.cf.miniclip.com/display/TM/Make+a+MIGRATION),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
 ## From [1.x] to [2.x]
 
 ### Update
