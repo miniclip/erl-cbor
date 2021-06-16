@@ -21,7 +21,7 @@
 % See: https://github.com/erlang/otp/pull/2906
 %
 -ifdef(full_ieee764_support_on_binary_matching).
--define(NEGATIVE_IEEE764_ZERO_ENCODING, "f98000000000000000").
+-define(NEGATIVE_IEEE764_ZERO_ENCODING, "fb8000000000000000").
 -else.
 -define(NEGATIVE_IEEE764_ZERO_ENCODING, "fb0000000000000000").
 -endif.
