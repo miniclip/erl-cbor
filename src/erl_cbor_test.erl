@@ -20,7 +20,7 @@
 %
 % See: https://github.com/erlang/otp/pull/2906
 %
--ifdef(full_ieee764_support_on_binary_matching).
+-ifdef(negative_floating_point_zeroes).
 -define(NEGATIVE_IEEE764_ZERO_ENCODING, "fb8000000000000000").
 -else.
 -define(NEGATIVE_IEEE764_ZERO_ENCODING, "fb0000000000000000").
