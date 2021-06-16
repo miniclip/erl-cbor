@@ -15,6 +15,19 @@ In the current state, the library supports:
 - A way to customize how tagged CBOR values are interpreted to Erlang values.
 - A configurable depth limit to protect against extremely deep data structures.
 
+## Versioning, changelog, migration guide and README
+
+This project adheres to [Semantic
+Versioning](https://semver.org/spec/v2.0.0.html).
+
+The format of `CHANGELOG.md` is based on [Keep a
+Changelog](https://keepachangelog.com/en/1.0.0/).
+
+Breaking changes are documented under `MIGRATION.md`.
+
+The format of `README.md` is based on [Make a
+README](https://www.makeareadme.com/).
+
 ## Documentation
 
 A handbook is available [in the `doc`
