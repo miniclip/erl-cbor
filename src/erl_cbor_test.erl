@@ -18,7 +18,7 @@
 -include_lib("eunit/include/eunit.hrl").
 
 %
-% See: https://github.com/erlang/otp/pull/4537
+% See: https://github.com/erlang/otp/pull/2906
 %
 -ifdef(full_ieee764_support_on_binary_matching).
 -define(NEGATIVE_IEEE764_ZERO_ENCODING, "f98000000000000000").
