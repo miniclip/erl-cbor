@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - linting via `rebar3_lint` [Paulo Oliveira]
 - facilities for easier Hex.pm publishing [Paulo Oliveira]
 - a type for decode errors [Guilherme Andrade]
+- invocation of EUnit tests under `make test` [Guilherme Andrade]
 
 ### Changed
 

@@ -43,9 +43,13 @@ elvis-rock:
 	@rebar3 lint
 .PHONY: elvis-rock
 
-test:
+test: eunit
 .NOTPARALLEL: test
 .PHONY: test
+
+eunit:
+	@rebar3 as test eunit
+.PHONY: eunit
 
 edoc:
 	@rebar3 edoc
