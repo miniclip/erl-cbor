@@ -19,6 +19,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - library name from `cbor` to `erl_cbor` [Guilherme Andrade]
 
+### Removed
+
+- module `cbor` from API (see MIGRATION.md) [Guilherme Andrade]
+- module `cbor_base64` from API (see MIGRATION.md) [Guilherme Andrade]
+- module `cbor_base64_test` from API (see MIGRATION.md) [Guilherme Andrade]
+- module `cbor_base64url` from API (see MIGRATION.md) [Guilherme Andrade]
+- module `cbor_base64url_test` from API (see MIGRATION.md) [Guilherme Andrade]
+- module `cbor_decoding` from API (see MIGRATION.md) [Guilherme Andrade]
+- module `cbor_encoding` from API (see MIGRATION.md) [Guilherme Andrade]
+- module `cbor_float` from API (see MIGRATION.md) [Guilherme Andrade]
+- module `cbor_test` from API (see MIGRATION.md) [Guilherme Andrade]
+- module `cbor_time` from API (see MIGRATION.md) [Guilherme Andrade]
+- module `cbor_util` from API (see MIGRATION.md) [Guilherme Andrade]
+
 ### Fixed
 
 - broken test case when under OTP 24 [Guilherme Andrade]
