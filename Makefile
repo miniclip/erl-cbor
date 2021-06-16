@@ -48,7 +48,7 @@ test: eunit
 .PHONY: test
 
 eunit:
-	@rebar3 as test eunit
+	@rebar3 eunit
 .PHONY: eunit
 
 edoc:
