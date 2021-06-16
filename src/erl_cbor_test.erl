@@ -17,6 +17,15 @@
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 
+%
+% See: https://github.com/erlang/otp/pull/4537
+%
+-ifdef(full_ieee764_support_on_binary_matching).
+-define(NEGATIVE_IEEE764_ZERO_ENCODING, "f98000000000000000").
+-else.
+-define(NEGATIVE_IEEE764_ZERO_ENCODING, "fb0000000000000000").
+-endif.
+
 encode_test() ->
   Encode = fun (Value) ->
                binary_to_list(erl_cbor:encode_hex(Value))
@@ -42,7 +51,7 @@ encode_test() ->
   ?assertEqual("3903e7", Encode(-1000)),
   %% Floats
   ?assertEqual("fb0000000000000000", Encode(0.0)), % canonical: f90000
-  ?assertEqual("fb0000000000000000", Encode(-0.0)), % canonical: f98000
+  ?assertEqual(?NEGATIVE_IEEE764_ZERO_ENCODING, Encode(-0.0)), % canonical: f98000
   ?assertEqual("fb3ff0000000000000", Encode(1.0)), % canonical: f93c00
   ?assertEqual("f90000000000000000", Encode(positive_zero)),
   ?assertEqual("f98000000000000000", Encode(negative_zero)),

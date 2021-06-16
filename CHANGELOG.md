@@ -19,4 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - library name from `cbor` to `erl_cbor` [Guilherme Andrade]
 
+### Fixed
+
+- broken test case when under OTP 24 [Guilherme Andrade]
+
 ## Changes prior to 1.1.0 (including it) are not registered
