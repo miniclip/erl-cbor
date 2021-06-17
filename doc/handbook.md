@@ -1,7 +1,7 @@
-% erl-cbor
+% erl_cbor
 
 # Introduction
-The erl-cbor project is an Erlang library implementing the CBOR data encoding
+The erl_cbor project is an Erlang library implementing the CBOR data encoding
 format defined in [RFC 7049](https://tools.ietf.org/html/rfc7049).
 
 # Encoding
