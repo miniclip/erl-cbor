@@ -5,15 +5,15 @@ The erl-cbor project is an Erlang library implementing the CBOR data encoding
 format defined in [RFC 7049](https://tools.ietf.org/html/rfc7049).
 
 # Encoding
-The `cbor:encode/1` function encodes an Erlang term to a CBOR value and
+The `erl_cbor:encode/1` function encodes an Erlang term to a CBOR value and
 returns it as binary data.
 
-Example: `cbor:encode([1, 2, 3])` returns `[<<131>>,[[[<<>>,<<1>>],<<2>>],<<3>>]]`.
+Example: `erl_cbor:encode([1, 2, 3])` returns `[<<131>>,[[[<<>>,<<1>>],<<2>>],<<3>>]]`.
 
-The `cbor:encode_hex/1` function encodes data as `cbor:encode/1` but returns
+The `erl_cbor:encode_hex/1` function encodes data as `erl_cbor:encode/1` but returns
 the result as a hex-encoded binary string.
 
-Example: `cbor:encode_hex([1, 2, 3])` returns `<<"83010203">>`.
+Example: `erl_cbor:encode_hex([1, 2, 3])` returns `<<"83010203">>`.
 
 ## Type mapping
 Erlang data are encoded using the following type mapping:
@@ -42,16 +42,16 @@ Erlang data are encoded using the following type mapping:
     be of type `unicode:chardata/0`.
   - `{datetime, Value}`: `Value` is encoded to a CBOR UTF-8 string tagged as a
     standard datetime string using the datetime format specified by
-    RFC 3339. `Value` must be of type `cbor_time:datetime/0`.
+    RFC 3339. `Value` must be of type `erl_cbor_time:datetime/0`.
   - `{datetime, Value, UTCOffset}`: `Value` is encoded to a CBOR UTF-8 string
     tagged as a standard datetime string using the datetime format specified
-    by RFC 3339. `Value` must be of type `cbor_time:datetime/0`. `UTCOffset`
+    by RFC 3339. `Value` must be of type `erl_cbor_time:datetime/0`. `UTCOffset`
     is used to transform the universal date represented by `Value` into a
     local date whose timezone is separated from Universal Coordinated Time
     (UTC) by `UTCOffset` seconds.
   - `{timestamp, Value}`: `Value` is encoded to a CBOR integer or floating
     point number tagged as an epoch-based datetime. `Value` must be either of
-    type `cbor_time:datetime/0` or of type `erlang:timestamp()`.
+    type `erl_cbor_time:datetime/0` or of type `erlang:timestamp()`.
   - `{Tag, Value}`: `Value` is encoded to a tagged CBOR value; `Tag` must be a
     positive integer.
 
@@ -62,22 +62,22 @@ Note that the encoder does not support indefinite length byte strings, UTF-8
 strings, arrays or maps.
 
 # Decoding
-The `cbor:decode/1` function decodes a single CBOR value from binary data. If
+The `erl_cbor:decode/1` function decodes a single CBOR value from binary data. If
 it succeeds, it returns a tuple of the form `{ok, Value, Rest}` where `Value`
 is an Erlang term representing the decoded value, and `Rest` are the binary
 data left after decoding. If the function fails, it returns the usual `{error,
 Reason}` tuple.
 
-Example: `cbor:decode(<<99, 97, 98, 99, 24, 42>>)` returns
+Example: `erl_cbor:decode(<<99, 97, 98, 99, 24, 42>>)` returns
 `{ok,<<"abc">>,<<24,42>>}`.
 
-The `cbor:decode_hex/1` function decodes a CBOR value as `cbor:decode/1` but
+The `erl_cbor:decode_hex/1` function decodes a CBOR value as `erl_cbor:decode/1` but
 uses a hex-encoded binary or character string.
 
-Example: `cbor:decode_hex(<<"63616263182a">>)` returns
+Example: `erl_cbor:decode_hex(<<"63616263182a">>)` returns
 `{ok,<<"abc">>,"182a"}`.
 
-The `cbor:decode/2` and `cbor:decode_hex/2` functions expect a map of decoding
+The `erl_cbor:decode/2` and `erl_cbor:decode_hex/2` functions expect a map of decoding
 options as second argument.
 
 ## Decoding options
@@ -92,7 +92,7 @@ supported:
   function for each supported tagged value. Unsupported tagged values will be
   decoded to a tuple of the form `{Tag, Value}`.
 
-The `cbor_decoding:default_options/0` function returns the map of options used
+The `erl_cbor_decoding:default_options/0` function returns the map of options used
 by default.
 
 ## Type mapping
@@ -151,7 +151,7 @@ This mapping is configured with a map which associates each tag to its
 interpreter. Interpreters are functions which take the `{Tag, Value}` tagged
 value as argument and return either `{ok, Value2}` or `{error, Reason}`.
 
-The `cbor_decoding:default_tagged_value_interpreters/0` function returns the
+The `erl_cbor_decoding:default_tagged_value_interpreters/0` function returns the
 default map of tagged value interpreters.
 
 The following example extends the default interpreter map to decode CBOR
@@ -169,9 +169,9 @@ interpret_uri(_Decoder, TaggedValue) ->
   {error, {invalid_tagged_value, TaggedValue}}.
 
 custom_decode_hex(Data) ->
-  Interpreters = maps:merge(cbor_decoding:default_tagged_value_interpreters(),
+  Interpreters = maps:merge(erl_cbor_decoding:default_tagged_value_interpreters(),
                             #{32 => fun interpret_uri/2}),
-  Opts = maps:merge(cbor_decoding:default_options(),
+  Opts = maps:merge(erl_cbor_decoding:default_options(),
                     #{tagged_value_interpreters => Interpreters}),
-  cbor:decode(Data, Opts).
+  erl_cbor:decode(Data, Opts).
 ```

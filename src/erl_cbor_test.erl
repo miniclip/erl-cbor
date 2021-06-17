@@ -12,14 +12,23 @@
 %% ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
 %% IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
--module(cbor_test).
+-module(erl_cbor_test).
 
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 
+%
+% See: https://github.com/erlang/otp/pull/2906
+%
+-ifdef(negative_floating_point_zeroes).
+-define(NEGATIVE_IEEE764_ZERO_ENCODING, "fb8000000000000000").
+-else.
+-define(NEGATIVE_IEEE764_ZERO_ENCODING, "fb0000000000000000").
+-endif.
+
 encode_test() ->
   Encode = fun (Value) ->
-               binary_to_list(cbor:encode_hex(Value))
+               binary_to_list(erl_cbor:encode_hex(Value))
            end,
   %% Integers
   ?assertEqual("00", Encode(0)),
@@ -42,7 +51,7 @@ encode_test() ->
   ?assertEqual("3903e7", Encode(-1000)),
   %% Floats
   ?assertEqual("fb0000000000000000", Encode(0.0)), % canonical: f90000
-  ?assertEqual("fb0000000000000000", Encode(-0.0)), % canonical: f98000
+  ?assertEqual(?NEGATIVE_IEEE764_ZERO_ENCODING, Encode(-0.0)), % canonical: f98000
   ?assertEqual("fb3ff0000000000000", Encode(1.0)), % canonical: f93c00
   ?assertEqual("f90000000000000000", Encode(positive_zero)),
   ?assertEqual("f98000000000000000", Encode(negative_zero)),
@@ -161,7 +170,7 @@ encode_test() ->
 decode_test() ->
   Decode = fun (Str) ->
                Bin = list_to_binary(Str),
-               {ok, Value, _Rest} = cbor:decode_hex(Bin),
+               {ok, Value, _Rest} = erl_cbor:decode_hex(Bin),
                Value
            end,
   %% Integers
@@ -311,7 +320,7 @@ decode_test() ->
 decode_error_test() ->
   Decode = fun (Str) ->
                Bin = list_to_binary(Str),
-               {error, Reason} = cbor:decode_hex(Bin),
+               {error, Reason} = erl_cbor:decode_hex(Bin),
                Reason
            end,
   ?assertEqual(no_input, Decode("")),
@@ -412,9 +421,9 @@ decode_error_test() ->
 decode_depth_test() ->
   Decode = fun (Str, MaxDepth) ->
                Bin = list_to_binary(Str),
-               Opts = maps:merge(cbor_decoding:default_options(),
+               Opts = maps:merge(erl_cbor_decoding:default_options(),
                                  #{max_depth => MaxDepth}),
-               cbor:decode_hex(Bin, Opts)
+               erl_cbor:decode_hex(Bin, Opts)
            end,
   %% Arrays
   ?assertEqual({ok, [[[1]]], <<>>}, Decode("81818101", 5)),
@@ -451,8 +460,8 @@ decode_depth_test() ->
 
 decode_without_interpreters_test() ->
   ?assertEqual({ok, 18446744073709551616, <<>>},
-               cbor:decode_hex(<<"c249010000000000000000">>,
-                               cbor_decoding:default_options())),
+               erl_cbor:decode_hex(<<"c249010000000000000000">>,
+                               erl_cbor_decoding:default_options())),
   ?assertEqual({ok, {2, <<1, 0, 0, 0, 0, 0, 0, 0, 0>>}, <<>>},
-               cbor:decode_hex(<<"c249010000000000000000">>, #{})).
+               erl_cbor:decode_hex(<<"c249010000000000000000">>, #{})).
 -endif.

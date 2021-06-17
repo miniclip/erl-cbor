@@ -12,7 +12,7 @@
 %% ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
 %% IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
--module(cbor).
+-module(erl_cbor).
 
 -export([encode/1, encode_hex/1,
          decode/1, decode/2, decode_hex/1, decode_hex/2]).
@@ -31,35 +31,35 @@
 
 -spec encode(term()) -> iodata().
 encode(Data) ->
-  cbor_encoding:encode(Data).
+  erl_cbor_encoding:encode(Data).
 
 -spec encode_hex(term()) -> binary().
 encode_hex(Value) ->
-  Data = iolist_to_binary(cbor_encoding:encode(Value)),
-  cbor_util:binary_to_hex_string(Data).
+  Data = iolist_to_binary(erl_cbor_encoding:encode(Value)),
+  erl_cbor_util:binary_to_hex_string(Data).
 
--spec decode(iodata()) -> cbor_decoding:decoding_result(term()).
+-spec decode(iodata()) -> erl_cbor_decoding:decoding_result(term()).
 decode(Data) ->
-  decode(Data, cbor_decoding:default_options()).
+  decode(Data, erl_cbor_decoding:default_options()).
 
--spec decode(iodata(), cbor_decoding:options()) ->
-        cbor_decoding:decoding_result(term()).
+-spec decode(iodata(), erl_cbor_decoding:options()) ->
+        erl_cbor_decoding:decoding_result(term()).
 decode(Data, Opts) ->
-  Decoder = cbor_decoding:decoder(Opts),
-  cbor_decoding:decode(Decoder, Data).
+  Decoder = erl_cbor_decoding:decoder(Opts),
+  erl_cbor_decoding:decode(Decoder, Data).
 
--spec decode_hex(binary()) -> cbor_decoding:decoding_result(term()).
+-spec decode_hex(binary()) -> erl_cbor_decoding:decoding_result(term()).
 decode_hex(Value) ->
-  decode_hex(Value, cbor_decoding:default_options()).
+  decode_hex(Value, erl_cbor_decoding:default_options()).
 
--spec decode_hex(binary(), cbor_decoding:options()) ->
-        cbor_decoding:decoding_result(term()).
+-spec decode_hex(binary(), erl_cbor_decoding:options()) ->
+        erl_cbor_decoding:decoding_result(term()).
 decode_hex(Str, Opts) ->
-  Decoder = cbor_decoding:decoder(Opts),
-  Bin = cbor_util:hex_string_to_binary(Str),
-  case cbor_decoding:decode(Decoder, Bin) of
+  Decoder = erl_cbor_decoding:decoder(Opts),
+  Bin = erl_cbor_util:hex_string_to_binary(Str),
+  case erl_cbor_decoding:decode(Decoder, Bin) of
     {ok, Value, Rest} ->
-      {ok, Value, cbor_util:binary_to_hex_string(Rest)};
+      {ok, Value, erl_cbor_util:binary_to_hex_string(Rest)};
     {error, Reason} ->
       {error, Reason}
   end.
