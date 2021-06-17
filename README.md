@@ -1,7 +1,7 @@
-# erl-cbor [![GitHub Actions CI][ci-img]][ci]
+# erl_cbor [![GitHub Actions CI][ci-img]][ci]
 
-[ci]: https://github.com/miniclip/erl-cbor
-[ci-img]: https://github.com/miniclip/erl-cbor/workflows/build/badge.svg
+[ci]: https://github.com/miniclip/erl_cbor
+[ci-img]: https://github.com/miniclip/erl_cbor/workflows/build/badge.svg
 
 This repository contains an Erlang library implementing the CBOR data encoding
 format defined in [RFC 7049](https://tools.ietf.org/html/rfc7049).
@@ -31,4 +31,4 @@ README](https://www.makeareadme.com/).
 ## Documentation
 
 A handbook is available [in the `doc`
-directory](https://github.com/miniclip/erl-cbor/blob/master/doc/handbook.md).
+directory](https://github.com/miniclip/erl_cbor/blob/master/doc/handbook.md).

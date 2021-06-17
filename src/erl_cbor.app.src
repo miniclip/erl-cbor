@@ -17,7 +17,7 @@
     {vsn, git},
     {registered, []},
     {licenses, ["ISC license"]},
-    {links, [{"GitHub", "https://github.com/miniclip/erl-cbor"}]},
+    {links, [{"GitHub", "https://github.com/miniclip/erl_cbor"}]},
 
     {applications, [
         % OTP dependencies
