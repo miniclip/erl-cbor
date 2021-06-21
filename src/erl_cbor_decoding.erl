@@ -30,8 +30,8 @@
                      value_interpreters =>
                       #{erl_cbor:type() := value_interpreter()}}.
 
--type value_interpreter() :: fun((decoder(), erl_cbor:value()) ->
-                                    interpretation_result(term())).
+-type value_interpreter() :: fun((decoder(), erl_cbor:value()) -> interpretation_result(term()))
+                           | fun((erl_cbor:value()) -> interpretation_result(term())).
 
 -type decoding_result(ValueType) :: {ok, ValueType, iodata()} | {error, decoding_error()}.
 
@@ -72,17 +72,17 @@ default_options() ->
 -spec default_value_interpreters() ->
         #{erl_cbor:type() := value_interpreter()}.
 default_value_interpreters() ->
-  #{0 => fun interpret_utf8_string/2,
-    1 => fun interpret_epoch_based_datetime/2,
-    2 => fun interpret_positive_bignum/2,
-    3 => fun interpret_negative_bignum/2,
+  #{0 => fun interpret_utf8_string/1,
+    1 => fun interpret_epoch_based_datetime/1,
+    2 => fun interpret_positive_bignum/1,
+    3 => fun interpret_negative_bignum/1,
     24 => fun interpret_cbor_value/2,
-    32 => fun interpret_utf8_string/2,
-    33 => fun interpret_base64url_data/2,
-    34 => fun interpret_base64_data/2,
-    35 => fun interpret_utf8_string/2,
-    36 => fun interpret_utf8_string/2,
-    55799 => fun interpret_self_described_cbor_value/2}.
+    32 => fun interpret_utf8_string/1,
+    33 => fun interpret_base64url_data/1,
+    34 => fun interpret_base64_data/1,
+    35 => fun interpret_utf8_string/1,
+    36 => fun interpret_utf8_string/1,
+    55799 => fun interpret_self_described_cbor_value/1}.
 
 -spec decoder(options()) -> decoder().
 decoder(Opts) ->
@@ -345,72 +345,74 @@ maybe_interpret_value(Decoder, {Type, {ok, Value, Rest}}) ->
 interpret_value(Decoder = #decoder{options = #{value_interpreters := Interpreters}},
                        TaggedValue = {Tag, _Value}) ->
   case maps:find(Tag, Interpreters) of
-    {ok, Interpreter} ->
+    {ok, Interpreter} when is_function(Interpreter, 2) ->
       Interpreter(Decoder, TaggedValue);
+    {ok, Interpreter} when is_function(Interpreter, 1) ->
+      Interpreter(TaggedValue);
     error ->
       {ok, TaggedValue}
   end;
 interpret_value(_Decoder, TaggedValue) ->
   {ok, TaggedValue}.
 
--spec interpret_utf8_string(decoder(), erl_cbor:value()) ->
+-spec interpret_utf8_string(erl_cbor:value()) ->
         interpretation_result(unicode:chardata()).
-interpret_utf8_string(_Decoder, {_Tag, Value}) when is_binary(Value) ->
+interpret_utf8_string({_Tag, Value}) when is_binary(Value) ->
   {ok, Value};
-interpret_utf8_string(_Decoder, TaggedValue) ->
+interpret_utf8_string(TaggedValue) ->
   {error, {invalid_tagged_value, TaggedValue}}.
 
--spec interpret_epoch_based_datetime(decoder(), erl_cbor:value()) ->
+-spec interpret_epoch_based_datetime(erl_cbor:value()) ->
         interpretation_result(integer()).
-interpret_epoch_based_datetime(_Decoder, {_Tag, Value}) when
+interpret_epoch_based_datetime({_Tag, Value}) when
     is_integer(Value) ->
   {ok, Value * 1000000000};
-interpret_epoch_based_datetime(_Decoder, {_Tag, Value}) when
+interpret_epoch_based_datetime({_Tag, Value}) when
     is_float(Value) ->
   {ok, round(Value * 1.0e9)};
-interpret_epoch_based_datetime(_Decoder, TaggedValue) ->
+interpret_epoch_based_datetime(TaggedValue) ->
   {error, {invalid_tagged_value, TaggedValue}}.
 
--spec interpret_positive_bignum(decoder(), erl_cbor:value()) ->
+-spec interpret_positive_bignum(erl_cbor:value()) ->
         interpretation_result(integer()).
-interpret_positive_bignum(_Decoder, {_Tag, Value}) when is_binary(Value) ->
+interpret_positive_bignum({_Tag, Value}) when is_binary(Value) ->
   Size = byte_size(Value) * 8,
   <<N:Size>> = Value,
   {ok, N};
-interpret_positive_bignum(_Decoder, TaggedValue) ->
+interpret_positive_bignum(TaggedValue) ->
   {error, {invalid_tagged_value, TaggedValue}}.
 
--spec interpret_negative_bignum(decoder(), erl_cbor:value()) ->
+-spec interpret_negative_bignum(erl_cbor:value()) ->
         interpretation_result(integer()).
-interpret_negative_bignum(_Decoder, {_Tag, Value}) when is_binary(Value) ->
+interpret_negative_bignum({_Tag, Value}) when is_binary(Value) ->
   Size = byte_size(Value) * 8,
   <<N:Size>> = Value,
   {ok, -1 - N};
-interpret_negative_bignum(_Decoder, TaggedValue) ->
+interpret_negative_bignum(TaggedValue) ->
   {error, {invalid_tagged_value, TaggedValue}}.
 
--spec interpret_base64url_data(decoder(), erl_cbor:value()) ->
+-spec interpret_base64url_data(erl_cbor:value()) ->
         interpretation_result(binary()).
-interpret_base64url_data(_Decoder, {_Tag, Value}) when is_binary(Value) ->
+interpret_base64url_data({_Tag, Value}) when is_binary(Value) ->
   case erl_cbor_base64url:decode(Value) of
     {ok, Bin} ->
       {ok, Bin};
     {error, Reason} ->
       {error, {invalid_base64url_data, Reason}}
   end;
-interpret_base64url_data(_Decoder, TaggedValue) ->
+interpret_base64url_data(TaggedValue) ->
   {error, {invalid_tagged_value, TaggedValue}}.
 
--spec interpret_base64_data(decoder(), erl_cbor:value()) ->
+-spec interpret_base64_data(erl_cbor:value()) ->
         interpretation_result(binary()).
-interpret_base64_data(_Decoder, {_Tag, Value}) when is_binary(Value) ->
+interpret_base64_data({_Tag, Value}) when is_binary(Value) ->
   case erl_cbor_base64:decode(Value) of
     {ok, Bin} ->
       {ok, Bin};
     {error, Reason} ->
       {error, {invalid_base64_data, Reason}}
   end;
-interpret_base64_data(_Decoder, TaggedValue) ->
+interpret_base64_data(TaggedValue) ->
   {error, {invalid_tagged_value, TaggedValue}}.
 
 -spec interpret_cbor_value(decoder(), erl_cbor:value()) ->
@@ -427,9 +429,9 @@ interpret_cbor_value(Decoder, {_Tag, Value}) when is_binary(Value) ->
 interpret_cbor_value(_Decoder, TaggedValue) ->
   {error, {invalid_tagged_value, TaggedValue}}.
 
--spec interpret_self_described_cbor_value(decoder(), erl_cbor:value()) ->
+-spec interpret_self_described_cbor_value(erl_cbor:value()) ->
         interpretation_result(term()).
-interpret_self_described_cbor_value(_Decoder, {_Tag, Value}) ->
+interpret_self_described_cbor_value({_Tag, Value}) ->
   {ok, Value}.
 
 -spec decode_simple_value(Type, iodata()) ->
