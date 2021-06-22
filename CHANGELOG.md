@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- missing release info in CHANGELOG.md [Guilherme Andrade]
+
+## [2.0.0] - 2021-06-22
+
 ### Added
 
 - `setup-beam` -based GitHub Actions CI over Erlang 22-24 [Paulo Oliveira]
