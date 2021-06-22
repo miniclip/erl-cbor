@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `rebar3_hank` [Paulo Oliveira]
+
+### Changed
+
+- CI container approach to `setup-beam` with cache [Paulo Oliveira]
+
 ### Fixed
 
 - missing release info in CHANGELOG.md [Guilherme Andrade]
