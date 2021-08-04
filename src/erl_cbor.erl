@@ -48,7 +48,8 @@
 -type simple_value() :: {simple_value, byte()}
                       | false | true | null | undefined.
 
--spec encode(erl_cbor_encoding:encodable()) -> nonempty_binary().
+-spec encode(erl_cbor_encoding:encodable()) ->
+    nonempty_binary() | nonempty_list(<<_:8>> | unicode:chardata()).
 encode(Data) ->
   erl_cbor_encoding:encode(Data).
 

@@ -42,7 +42,7 @@
 
 -export_type([encodable/0]).
 
--spec encode(encodable()) -> nonempty_binary().
+-spec encode(encodable()) -> nonempty_binary() | nonempty_list(<<_:8>> | unicode:chardata()).
 encode(Value) when is_integer(Value) ->
   encode_integer(Value);
 encode(Value) when is_float(Value) ->
