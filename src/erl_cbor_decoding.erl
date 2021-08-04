@@ -17,6 +17,10 @@
 -export([default_options/0, default_value_interpreters/0,
          decoder/1, decode/2]).
 
+-if(?OTP_RELEASE < 24).
+-type nonempty_binary() :: <<_:8, _:_*8>>.
+-endif.
+
 -export_type([decoder/0, options/0, value_interpreter/0,
              decoding_result/1, decoding_error/0,
              invalid_input_error/0, truncated_input_error/0,

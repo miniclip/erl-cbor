@@ -19,6 +19,10 @@
          binary_to_hex_string/1, hex_string_to_binary/1,
          list_to_map/1]).
 
+-if(?OTP_RELEASE < 24).
+-type nonempty_binary() :: <<_:8, _:_*8>>.
+-endif.
+
 -spec unsigned_integer_bytes(non_neg_integer()) -> nonempty_binary().
 unsigned_integer_bytes(I) ->
   unsigned_integer_bytes(I, []).

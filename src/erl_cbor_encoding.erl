@@ -16,6 +16,10 @@
 
 -export([encode/1]).
 
+-if(?OTP_RELEASE < 24).
+-type nonempty_binary() :: <<_:8, _:_*8>>.
+-endif.
+
 -type encodable() :: integer()
                    | float()
                    | positive_zero

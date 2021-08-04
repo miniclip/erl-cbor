@@ -17,6 +17,10 @@
 -export([encode/1, encode_hex/1,
          decode/1, decode/2, decode_hex/1, decode_hex/2]).
 
+-if(?OTP_RELEASE < 24).
+-type nonempty_binary() :: <<_:8, _:_*8>>.
+-endif.
+
 -export_type([tag/0, value/0, simple_value/0, type/0]).
 
 -type tag() :: non_neg_integer().
