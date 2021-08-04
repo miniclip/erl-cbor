@@ -24,8 +24,7 @@
 -export_type([decoder/0, options/0, value_interpreter/0,
              decoding_result/1, decoding_error/0,
              invalid_input_error/0, truncated_input_error/0,
-             interpretation_result/1, interpretation_error/0,
-             decodable/0]).
+             interpretation_result/1, interpretation_error/0]).
 
 -record(decoder, {options = #{} :: options(),
                   depth = 0 :: non_neg_integer()}).
@@ -37,14 +36,6 @@
 
 -type value_interpreter() :: fun((decoder(), erl_cbor:value()) -> interpretation_result(term()))
                            | fun((erl_cbor:value()) -> interpretation_result(term())).
-
--type decodable() :: integer()
-                   | binary()
-                   | list()
-                   | map()
-                   | erl_cbor:value()
-                   | erl_cbor:simple_value()
-                   | erl_cbor_float:value().
 
 -type decoding_result(Decodable) :: {ok, Decodable, binary()} | {error, decoding_error()}.
 
