@@ -332,7 +332,7 @@ decode_tagged_value(_Decoder, _Type, _Data) ->
   {error, truncated_tagged_value}.
 
 -spec decode_tagged_data(decoder(), erl_cbor:tag(), binary()) ->
-        decoding_result(term()).
+        decoding_result(erl_cbor:value()).
 decode_tagged_data(Decoder = #decoder{depth = Depth}, Tag, Data) ->
   Decoder2 = Decoder#decoder{depth = Depth+1},
   case decode(Decoder2, Data) of
