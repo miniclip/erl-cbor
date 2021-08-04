@@ -33,7 +33,7 @@
 
 -type options() :: #{max_depth => non_neg_integer(),
                      value_interpreters =>
-                      #{erl_cbor:tag() := value_interpreter()}}.
+                      #{erl_cbor:type() := value_interpreter()}}.
 
 -type value_interpreter() :: fun((decoder(), erl_cbor:value()) -> interpretation_result(term()))
                            | fun((erl_cbor:value()) -> interpretation_result(term())).
