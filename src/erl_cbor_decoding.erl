@@ -436,7 +436,7 @@ interpret_base64_data(TaggedValue) ->
 
 -spec interpret_cbor_value(decoder(), {erl_cbor:type(), binary()}) ->
         interpretation_result(term()).
-interpret_cbor_value(Decoder, {_Tag, Value}) when is_binary(Value) ->
+interpret_cbor_value(Decoder, {_Type, Value}) when is_binary(Value) ->
   case decode(Decoder, Value) of
     {ok, Value2, <<>>} ->
       {ok, Value2};
