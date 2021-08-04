@@ -21,28 +21,43 @@
 
 -type tag() :: non_neg_integer().
 
--type type() :: unsigned_integer | neg_integer | byte_string
-              | utf8_string | array | map | simple | float | tag().
+-type type() :: unsigned_integer
+              | neg_integer
+              | byte_string
+              | utf8_string
+              | array
+              | map
+              | simple
+              | float
+              | tag().
 
--type value() :: {type(), term()}.
+-type value() :: {type(), integer()
+                        | binary()
+                        | list()
+                        | map()
+                        | byte()
+                        | boolean()
+                        | null
+                        | undefined
+                        | float()}.
 
--type simple_value() :: {simple_value, 0..255}
+-type simple_value() :: {simple_value, byte()}
                       | false | true | null | undefined.
 
--spec encode(term()) -> iodata().
+-spec encode(erl_cbor_encoding:encodable()) -> nonempty_binary().
 encode(Data) ->
   erl_cbor_encoding:encode(Data).
 
--spec encode_hex(term()) -> binary().
+-spec encode_hex(erl_cbor_encoding:encodable()) -> unicode:chardata().
 encode_hex(Value) ->
   Data = iolist_to_binary(erl_cbor_encoding:encode(Value)),
   erl_cbor_util:binary_to_hex_string(Data).
 
--spec decode(iodata()) -> erl_cbor_decoding:decoding_result(term()).
+-spec decode(binary()) -> erl_cbor_decoding:decoding_result(term()).
 decode(Data) ->
   decode(Data, erl_cbor_decoding:default_options()).
 
--spec decode(iodata(), erl_cbor_decoding:options()) ->
+-spec decode(binary(), erl_cbor_decoding:options()) ->
         erl_cbor_decoding:decoding_result(term()).
 decode(Data, Opts) ->
   Decoder = erl_cbor_decoding:decoder(Opts),

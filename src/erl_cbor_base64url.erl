@@ -16,7 +16,7 @@
 
 -export([decode/1]).
 
--spec decode(iodata()) -> {ok, binary()} | {error, term()}.
+-spec decode(binary()) -> {ok, binary()} | {error, badarith}.
 decode(Data) ->
   try decode(Data, <<>>) of
     Result ->

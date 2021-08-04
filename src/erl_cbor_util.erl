@@ -19,17 +19,17 @@
          binary_to_hex_string/1, hex_string_to_binary/1,
          list_to_map/1]).
 
--spec unsigned_integer_bytes(non_neg_integer()) -> binary().
+-spec unsigned_integer_bytes(non_neg_integer()) -> nonempty_binary().
 unsigned_integer_bytes(I) ->
   unsigned_integer_bytes(I, []).
 
--spec unsigned_integer_bytes(non_neg_integer(), [byte()]) -> binary().
+-spec unsigned_integer_bytes(non_neg_integer(), [byte()]) -> nonempty_binary().
 unsigned_integer_bytes(0, Acc) ->
   list_to_binary(Acc);
 unsigned_integer_bytes(I, Acc) ->
   unsigned_integer_bytes(I bsr 8, [I band 16#ff | Acc]).
 
--spec encode_sequence_header(MajorType :: 0..7, Len) -> binary() when
+-spec encode_sequence_header(MajorType :: 0..7, Len) -> nonempty_binary() when
     Len :: non_neg_integer().
 encode_sequence_header(MajorType, Len) when Len =< 16#17 ->
   <<MajorType:3, Len:5>>;
@@ -44,8 +44,8 @@ encode_sequence_header(MajorType, Len) when Len =< 16#ffffffffffffffff ->
 encode_sequence_header(_MajorType, Len) ->
   error({unencodable_sequence_length, Len}).
 
--spec decode_sequence_header(Tag, iodata()) ->
-        {ok, Len, iodata()} | {error, Reason} when
+-spec decode_sequence_header(Tag, nonempty_binary()) ->
+        {ok, Len, nonempty_binary()} | {error, Reason} when
     Tag :: byte(),
     Len :: non_neg_integer(),
     Reason :: truncated_sequence_header | invalid_sequence_header.
@@ -85,12 +85,12 @@ decode_sequence_header(Tag, Data) ->
       {error, invalid_sequence_header}
   end.
 
--spec binary_to_hex_string(binary()) -> binary().
+-spec binary_to_hex_string(binary()) -> unicode:chardata().
 binary_to_hex_string(Bin) ->
   HexData = [io_lib:format("~2.16.0B", [Byte]) || <<Byte:8>> <= Bin],
   string:lowercase(iolist_to_binary(HexData)).
 
--spec hex_string_to_binary(binary()) -> binary().
+-spec hex_string_to_binary(unicode:chardata()) -> binary().
 hex_string_to_binary(Str) ->
   hex_string_to_binary(Str, <<>>).
 

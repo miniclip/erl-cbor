@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - missing release info in CHANGELOG.md [Guilherme Andrade]
+- several `-specs(_).` [Paulo Oliveira]
 
 ## [2.0.0] - 2021-06-22
 

@@ -16,7 +16,29 @@
 
 -export([encode/1]).
 
--spec encode(term()) -> iodata().
+-type encodable() :: integer()
+                   | float()
+                   | positive_zero
+                   | negative_zero
+                   | positive_infinity
+                   | negative_infinity
+                   | nan
+                   | boolean()
+                   | binary()
+                   | list()
+                   | map()
+                   | byte()
+                   | null
+                   | undefined
+                   | {string, string() | binary()}
+                   | {datetime, erl_cbor_time:datetime()}
+                   | {datetime, erl_cbor_time:datetime(), integer()}
+                   | {timestamp, erl_cbor_time:datetime()}
+                   | {erl_cbor:tag(), encodable()}.
+
+-export_type([encodable/0]).
+
+-spec encode(encodable()) -> nonempty_binary().
 encode(Value) when is_integer(Value) ->
   encode_integer(Value);
 encode(Value) when is_float(Value) ->
@@ -56,7 +78,7 @@ encode({Tag, Value}) when is_integer(Tag) ->
 encode(Value) ->
   error({unencodable_value, Value}).
 
--spec encode_integer(integer()) -> iodata().
+-spec encode_integer(integer()) -> nonempty_binary() | nonempty_list(<<_:8>> | unicode:chardata()).
 encode_integer(I) when I > 16#ffffffffffffffff ->
   [<<16#c2>>, encode_binary(erl_cbor_util:unsigned_integer_bytes(I))];
 encode_integer(I) when I > 16#ffffffff ->
@@ -82,38 +104,38 @@ encode_integer(I) when I >= -16#ffffffffffffffff - 1 ->
 encode_integer(I) ->
   [<<16#c3>>, encode_binary(erl_cbor_util:unsigned_integer_bytes(-1 - I))].
 
--spec encode_float(float()) -> iodata().
+-spec encode_float(float()) -> <<_:72>>.
 encode_float(F) ->
   <<16#fb, F:64/float>>.
 
--spec encode_boolean(boolean()) -> iodata().
+-spec encode_boolean(boolean()) -> <<_:8>>.
 encode_boolean(false) ->
   <<16#f4>>;
 encode_boolean(true) ->
   <<16#f5>>.
 
--spec encode_binary(binary()) -> iodata().
+-spec encode_binary(binary()) -> unicode:chardata().
 encode_binary(Bin) ->
   [erl_cbor_util:encode_sequence_header(2, byte_size(Bin)), Bin].
 
--spec encode_string(unicode:chardata()) -> iodata().
+-spec encode_string(unicode:chardata()) -> nonempty_list(binary()).
 encode_string(CharData) ->
   Bin = unicode:characters_to_binary(CharData),
   [erl_cbor_util:encode_sequence_header(3, byte_size(Bin)), Bin].
 
--spec encode_list(list()) -> iodata().
+-spec encode_list([encodable()]) -> nonempty_list(binary()).
 encode_list(List) ->
   {Data, Len} = encode_list_data(List, <<>>, 0),
   [erl_cbor_util:encode_sequence_header(4, Len), Data].
 
--spec encode_list_data(list(), iodata(), Len) -> {iodata(), Len} when
+-spec encode_list_data([encodable()], <<>> | nonempty_list(binary()), Len) -> {binary(), Len} when
     Len :: non_neg_integer().
 encode_list_data([], Data, Len) ->
   {Data, Len};
 encode_list_data([Value | Rest], Data, Len) ->
   encode_list_data(Rest, [Data, encode(Value)], Len + 1).
 
--spec encode_map(map()) -> iodata().
+-spec encode_map(map()) -> nonempty_list(binary()).
 encode_map(Map) ->
   Len = maps:size(Map),
   Data = maps:fold(fun (K, V, Acc) ->
@@ -124,12 +146,13 @@ encode_map(Map) ->
                           end, Data),
   [erl_cbor_util:encode_sequence_header(5, Len), SortedData].
 
--spec encode_datetime(Datetime) -> iodata() when
+-spec encode_datetime(Datetime) -> nonempty_list(nonempty_binary()) when
     Datetime :: calendar:datetime() | integer().
 encode_datetime(Datetime) ->
   encode_datetime(Datetime, 0).
 
--spec encode_datetime(erl_cbor_time:datetime(), integer()) -> iodata().
+-spec encode_datetime(erl_cbor_time:datetime(), integer()) ->
+    nonempty_list(nonempty_binary()).
 encode_datetime(Datetime, Offset) ->
   {Seconds, _Nanoseconds} = erl_cbor_time:datetime_to_seconds(Datetime),
   OffsetValue = case Offset of
@@ -139,7 +162,8 @@ encode_datetime(Datetime, Offset) ->
   String = calendar:system_time_to_rfc3339(Seconds, [{offset, OffsetValue}]),
   encode_tagged_value(0, {string, String}).
 
--spec encode_timestamp(erl_cbor_time:datetime()) -> iodata().
+-spec encode_timestamp(erl_cbor_time:datetime()) ->
+    nonempty_list(nonempty_binary()).
 encode_timestamp(Datetime) ->
   case erl_cbor_time:datetime_to_seconds(Datetime) of
     {Seconds, 0} ->
@@ -148,7 +172,8 @@ encode_timestamp(Datetime) ->
       encode_tagged_value(1, erlang:float(Seconds) + Nanoseconds * 1.0e-9)
   end.
 
--spec encode_tagged_value(erl_cbor:tag(), term()) -> iodata().
+-spec encode_tagged_value(erl_cbor:tag(), encodable()) ->
+    nonempty_list(nonempty_binary()).
 encode_tagged_value(Tag, Value) when Tag =< 16#17 ->
   [<<6:3, Tag:5>>, encode(Value)];
 encode_tagged_value(Tag, Value) when Tag =< 16#ff ->
