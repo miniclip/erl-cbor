@@ -48,7 +48,8 @@
                                odd_number_of_map_values |
                                {invalid_base64_data, {invalid_data, binary()}
                                                    | {invalid_base64_digit, byte()}} |
-                               {invalid_base64url_data, badarith} |
+                               {invalid_base64url_data, {invalid_data, binary()}
+                                                      | {invalid_base64url_digit, byte()}} |
                                {invalid_cbor_data, term()} |
                                {invalid_tagged_value, tuple()} |
                                {invalid_trailing_data, nonempty_binary()} |
