@@ -46,7 +46,8 @@
 -type invalid_input_error() :: invalid_sequence_header |
                                no_input |
                                odd_number_of_map_values |
-                               {invalid_base64_data, {invalid_data, binary()}} |
+                               {invalid_base64_data, {invalid_data, binary()}
+                                                   | {invalid_base64_digit, byte()}} |
                                {invalid_base64url_data, badarith} |
                                {invalid_cbor_data, term()} |
                                {invalid_tagged_value, tuple()} |
