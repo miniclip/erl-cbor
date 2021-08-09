@@ -82,7 +82,8 @@ encode({Tag, Value}) when is_integer(Tag) ->
 encode(Value) ->
   error({unencodable_value, Value}).
 
--spec encode_integer(integer()) -> nonempty_binary() | nonempty_list(<<_:8>> | unicode:chardata()).
+-spec encode_integer(integer()) -> nonempty_binary()
+                                 | nonempty_list(<<_:8>> | nonempty_list(binary())).
 encode_integer(I) when I > 16#ffffffffffffffff ->
   [<<16#c2>>, encode_binary(erl_cbor_util:unsigned_integer_bytes(I))];
 encode_integer(I) when I > 16#ffffffff ->
