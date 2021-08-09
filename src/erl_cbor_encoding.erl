@@ -119,7 +119,7 @@ encode_boolean(false) ->
 encode_boolean(true) ->
   <<16#f5>>.
 
--spec encode_binary(binary()) -> unicode:chardata().
+-spec encode_binary(binary()) -> nonempty_list(binary()).
 encode_binary(Bin) ->
   [erl_cbor_util:encode_sequence_header(2, byte_size(Bin)), Bin].
 
