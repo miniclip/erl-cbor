@@ -94,7 +94,7 @@ binary_to_hex_string(Bin) ->
   HexData = [io_lib:format("~2.16.0B", [Byte]) || <<Byte:8>> <= Bin],
   string:lowercase(iolist_to_binary(HexData)).
 
--spec hex_string_to_binary(unicode:chardata()) -> binary().
+-spec hex_string_to_binary(binary()) -> binary().
 hex_string_to_binary(Str) ->
   hex_string_to_binary(Str, <<>>).
 
