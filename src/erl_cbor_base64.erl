@@ -16,7 +16,8 @@
 
 -export([decode/1]).
 
--spec decode(iodata()) -> {ok, binary()} | {error, term()}.
+-spec decode(binary()) -> {ok, binary()} | {error, {invalid_data, binary()}
+                                                 | {invalid_base64_digit, byte()}}.
 decode(Data) ->
   try decode(Data, <<>>) of
     Result ->

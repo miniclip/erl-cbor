@@ -20,7 +20,7 @@
 
 -type value() :: float() | positive_infinity | negative_infinity | nan.
 
--spec decode_f16(iodata()) -> value().
+-spec decode_f16(<<_:16>>) -> value().
 decode_f16(<<_S:1, 0:5, 0:10>>) ->
   0.0;
 decode_f16(<<S:1, 0:5, F:10>>) ->
@@ -34,7 +34,7 @@ decode_f16(<<_S:1, 31:5, _F:10>>) ->
 decode_f16(<<S:1, E:5, F:10>>) ->
   math:pow(-1.0, S) * math:pow(2.0, E-15) * (1 + F/1024.0).
 
--spec decode_f32(iodata()) -> value().
+-spec decode_f32(<<_:32>>) -> value().
 decode_f32(<<_S:1, 0:8, 0:23>>) ->
   0.0;
 decode_f32(<<0:1, 255:8, 0:23>>) ->
@@ -46,7 +46,7 @@ decode_f32(<<_S:1, 255:8, _F:23>>) ->
 decode_f32(<<F:32/float>>) ->
   F.
 
--spec decode_f64(iodata()) -> value().
+-spec decode_f64(<<_:64>>) -> value().
 decode_f64(<<_S:1, 0:11, 0:52>>) ->
   0.0;
 decode_f64(<<0:1, 2047:11, 0:52>>) ->
