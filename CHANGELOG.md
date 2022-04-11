@@ -10,10 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `rebar3_hank` [Paulo Oliveira]
+- `rebar3_ex_doc` + `make ex_doc-dry` [Paulo Oliveira]
 
 ### Changed
 
 - CI container approach to `setup-beam` with cache [Paulo Oliveira]
+- `edoc`-based doc. to `ex_doc`-based doc. [Paulo Oliveira]
 
 ### Fixed
 
